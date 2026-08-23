@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Noto+Sans+Malayalam:wght@400;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary-green: #315C2B;
+  --color-primary-dark: #1F4522;
+  --color-accent-gold: #D99A20;
+  --color-accent-marigold: #E87919;
+  --color-accent-vermilion: #C84630;
+  --color-accent-brown: #4A321F;
+  --color-background-cream: #FFF8E7;
+  --color-background-sand: #F3E5C8;
+  --font-display: "Playfair Display", "Cormorant Garamond", serif;
+  --font-body: Inter, Manrope, sans-serif;
+  --font-malayalam: "Noto Sans Malayalam", sans-serif;
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background-cream);
+    color: var(--color-accent-brown);
+    font-family: var(--font-body);
+    background-image: url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    color: var(--color-primary-dark);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-green text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:bg-primary-dark hover:-translate-y-0.5 shadow-soft hover:shadow-md flex items-center justify-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-background-sand text-primary-dark px-6 py-2 rounded-full font-medium transition-all duration-300 hover:bg-[#EBD5A9] hover:-translate-y-0.5 shadow-soft hover:shadow-md flex items-center justify-center gap-2;
+  }
+
+  .card-surface {
+    @apply bg-background-cream/90 backdrop-blur-sm rounded-[20px] border border-accent-brown/10 shadow-soft p-4;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(49, 92, 43, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(49, 92, 43, 0.5);
+}
+
+/* Canvas Grid Pattern */
+.canvas-grid {
+  background-size: 40px 40px;
+  background-position: center center;
+  background-image: 
+    linear-gradient(to right, rgba(74, 50, 31, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(74, 50, 31, 0.05) 1px, transparent 1px);
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-transition {
+  animation: fadeInSlideUp 0.3s ease-out forwards;
+}
