@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { cn } from '../utils/cn';
-import { X, Plus, Image as ImageIcon, Info, Layers } from 'lucide-react';
+import { Image as ImageIcon } from 'lucide-react';
 
 const flowers = Array.from({ length: 23 }, (_, i) => ({
   id: `flower-${i + 1}`,
@@ -14,57 +13,6 @@ export default function SidebarRight() {
   const setTool = useStore(state => state.setTool);
   const selectedFlower = useStore(state => state.selectedFlower);
   const selectFlower = useStore(state => state.selectFlower);
-  
-  const { designName, description, tags, setDesignInfo } = useStore();
-  const [newTag, setNewTag] = useState('');
-
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setDesignInfo({ tags: [...tags, newTag.trim()] });
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setDesignInfo({ tags: tags.filter(tag => tag !== tagToRemove) });
-  };
-
-  const loadTemplate = useStore(state => state.loadTemplate);
-
-  const presets = [
-    { 
-      name: 'Traditional', 
-      date: 'Aug 20',
-      data: {
-        elements: [
-          { id: '1', type: 'flower' as const, name: 'Flower 1', x: 0, y: 0, rotation: 0, scale: 1 },
-          { id: '2', type: 'flower' as const, name: 'Flower 2', x: 50, y: 0, rotation: 0, scale: 0.8 },
-          { id: '3', type: 'flower' as const, name: 'Flower 2', x: -50, y: 0, rotation: 180, scale: 0.8 },
-          { id: '4', type: 'flower' as const, name: 'Flower 2', x: 0, y: 50, rotation: 90, scale: 0.8 },
-          { id: '5', type: 'flower' as const, name: 'Flower 2', x: 0, y: -50, rotation: 270, scale: 0.8 },
-        ],
-        rings: [],
-        designName: 'Traditional',
-        description: 'A classic start.',
-        tags: ['Traditional']
-      }
-    },
-    { 
-      name: 'Modern Onam', 
-      date: 'Aug 18',
-      data: {
-        elements: [
-          { id: '1', type: 'flower' as const, name: 'Flower 3', x: 0, y: 0, rotation: 0, scale: 1.5 },
-          { id: '2', type: 'flower' as const, name: 'Flower 4', x: 40, y: 40, rotation: 45, scale: 0.8 },
-          { id: '3', type: 'flower' as const, name: 'Flower 4', x: -40, y: -40, rotation: 225, scale: 0.8 },
-        ],
-        rings: [],
-        designName: 'Modern Onam',
-        description: 'A modern approach.',
-        tags: ['Modern', 'Minimal']
-      }
-    },
-  ];
 
   return (
     <div className="flex flex-col h-full overflow-hidden w-full">

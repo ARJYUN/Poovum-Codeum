@@ -7,7 +7,6 @@ import {
   Redo2,
   CircleDashed,
   Circle,
-  Flower2,
   Trash2,
   Minus,
   Paintbrush,

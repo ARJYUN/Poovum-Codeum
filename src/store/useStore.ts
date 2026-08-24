@@ -17,7 +17,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export const useStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       selectedTool: 'Select',
       selectedFlower: 'Flower 1',
@@ -63,10 +63,11 @@ export const useStore = create<AppState>()(
 
       removeElement: (id) => set((state) => {
         const newElements = state.elements.filter((el) => el.id !== id);
-        return updateHistory(state, { 
-          elements: newElements,
+        const historyUpdate = updateHistory(state, { elements: newElements });
+        return { 
+          ...historyUpdate,
           selectedElementId: state.selectedElementId === id ? null : state.selectedElementId
-        });
+        };
       }),
 
       duplicateElement: (id) => set((state) => {
@@ -81,10 +82,11 @@ export const useStore = create<AppState>()(
         };
         
         const newElements = [...state.elements, newElement];
-        return updateHistory(state, { 
-          elements: newElements,
+        const historyUpdate = updateHistory(state, { elements: newElements });
+        return { 
+          ...historyUpdate,
           selectedElementId: newElement.id
-        });
+        };
       }),
 
       addRing: (ringData) => set((state) => {

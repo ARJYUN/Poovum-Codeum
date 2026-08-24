@@ -69,7 +69,7 @@ export interface AppState extends DesignState {
   undo: () => void;
   redo: () => void;
   
-  setDesignInfo: (info: { name?: string; description?: string; tags?: string[] }) => void;
+  setDesignInfo: (info: { designName?: string; description?: string; tags?: string[] }) => void;
   loadTemplate: (template: DesignState) => void;
   clearCanvas: () => void;
   

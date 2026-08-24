@@ -1,8 +1,8 @@
-import { useRef, MouseEvent, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import type { MouseEvent } from 'react';
 import { useStore } from '../store/useStore';
 import { cn } from '../utils/cn';
 import type { PookalamElement } from '../types';
-import confetti from 'canvas-confetti';
 
 const FLOWER_MAP: Record<string, string> = {
   ...Object.fromEntries(
@@ -18,10 +18,9 @@ export default function Canvas() {
     selectedTool, 
     selectedFlower, 
     selectedElementId,
-    addElement,
-    updateElement,
+    selectElement, 
+    updateElement, 
     removeElement,
-    selectElement,
     showGrid
   } = useStore();
 
@@ -143,7 +142,7 @@ export default function Canvas() {
     }
   };
 
-  const handleCanvasClick = (e: MouseEvent) => {
+  const handleCanvasClick = () => {
     if (selectedTool === 'Select' && !hoveredElementId) {
        selectElement(null);
     }
