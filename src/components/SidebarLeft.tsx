@@ -10,13 +10,17 @@ import {
   Trash2,
   Minus,
   Paintbrush,
-  PenTool
+  PenTool,
+  Snowflake,
+  Hexagon
 } from 'lucide-react';
 import type { ToolType } from '../types';
 
 const tools: { id: ToolType; icon: any; label: string }[] = [
   { id: 'Select', icon: Move, label: 'Move Elements' },
   { id: 'Brush', icon: Paintbrush, label: 'Brush Tool' },
+  { id: 'Mandala', icon: Snowflake, label: 'Mandala Tool' },
+  { id: 'Polygon', icon: Hexagon, label: 'Polygon Shape' },
   { id: 'Line', icon: Minus, label: 'Draw Line' },
   { id: 'Circle', icon: CircleDashed, label: 'Big Circle' },
   { id: 'SmallCircle', icon: Circle, label: 'Small Circle' },

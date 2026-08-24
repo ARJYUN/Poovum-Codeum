@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import type { MouseEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent, MouseEvent } from 'react';
 import { useStore } from '../store/useStore';
 import { cn } from '../utils/cn';
 import type { PookalamElement } from '../types';
@@ -56,10 +56,14 @@ export default function Canvas() {
 
   const sizePx = getCanvasPxSize();
 
-  const handleCanvasMouseDown = (e: MouseEvent) => {
+  const handleCanvasPointerDown = (e: ReactPointerEvent) => {
+    // Also prevent default touch actions (like scrolling) when drawing on the canvas
+    if (e.target instanceof Element && e.target.id === 'pookalam-canvas') {
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    }
     if (selectedTool === 'Eraser') {
       setIsErasing(true);
-    } else if (selectedTool === 'Circle' && selectedFlower) {
+    } else if ((selectedTool === 'Circle' || selectedTool === 'Polygon') && selectedFlower) {
       setIsDrawingCircle(true);
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
@@ -120,7 +124,7 @@ export default function Canvas() {
         setLineStart({ x, y });
         setLineEnd({ x, y });
       }
-    } else if (selectedTool === 'Brush' && selectedFlower) {
+    } else if ((selectedTool === 'Brush' || selectedTool === 'Mandala') && selectedFlower) {
       if (containerRef.current) {
         setIsBrushing(true);
         const rect = containerRef.current.getBoundingClientRect();
@@ -129,14 +133,22 @@ export default function Canvas() {
         const x = e.clientX - rect.left - centerX;
         const y = e.clientY - rect.top - centerY;
         
-        const newEl = {
-          type: selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const,
-          name: selectedFlower,
-          x, y,
-          rotation: Math.random() * 360,
-          scale: 1
-        };
-        setBrushElements([newEl]);
+        const type = selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const;
+        const newElements = [];
+        
+        if (selectedTool === 'Mandala') {
+          const symmetries = 8;
+          for (let i = 0; i < symmetries; i++) {
+            const angle = (Math.PI * 2 / symmetries) * i;
+            const rx = x * Math.cos(angle) - y * Math.sin(angle);
+            const ry = x * Math.sin(angle) + y * Math.cos(angle);
+            newElements.push({ type, name: selectedFlower, x: rx, y: ry, rotation: Math.random() * 360, scale: 1 });
+          }
+        } else {
+          newElements.push({ type, name: selectedFlower, x, y, rotation: Math.random() * 360, scale: 1 });
+        }
+        
+        setBrushElements(newElements);
         setLastBrushPoint({ x, y });
       }
     }
@@ -148,7 +160,7 @@ export default function Canvas() {
     }
   };
 
-  const handleElementClick = (e: MouseEvent, id: string) => {
+  const handleElementClick = (e: ReactPointerEvent, id: string) => {
     e.stopPropagation();
     if (selectedTool === 'Eraser') {
       removeElement(id);
@@ -157,7 +169,7 @@ export default function Canvas() {
     }
   };
 
-  const handleElementMouseDown = (e: MouseEvent, id: string) => {
+  const handleElementPointerDown = (e: ReactPointerEvent, id: string) => {
     if (selectedTool === 'Select') {
       e.stopPropagation();
       selectElement(id);
@@ -181,7 +193,7 @@ export default function Canvas() {
   };
 
   useEffect(() => {
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
+    const handlePointerMove = (e: globalThis.PointerEvent) => {
       if (isDragging && selectedElementId && selectedTool === 'Select' && containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         const centerX = rect.width / 2;
@@ -242,37 +254,78 @@ export default function Canvas() {
         const dist = Math.sqrt(dx * dx + dy * dy);
         
         if (dist >= 30) {
-          const newEl = {
-            type: selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const,
-            name: selectedFlower,
-            x, y,
-            rotation: Math.random() * 360,
-            scale: 1
-          };
-          setBrushElements(prev => [...prev, newEl]);
+          const type = selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const;
+          const newElements = [];
+          
+          if (selectedTool === 'Mandala') {
+            const symmetries = 8;
+            for (let i = 0; i < symmetries; i++) {
+              const angle = (Math.PI * 2 / symmetries) * i;
+              const rx = x * Math.cos(angle) - y * Math.sin(angle);
+              const ry = x * Math.sin(angle) + y * Math.cos(angle);
+              newElements.push({ type, name: selectedFlower, x: rx, y: ry, rotation: Math.random() * 360, scale: 1 });
+            }
+          } else {
+            newElements.push({ type, name: selectedFlower, x, y, rotation: Math.random() * 360, scale: 1 });
+          }
+          
+          setBrushElements(prev => [...prev, ...newElements]);
           setLastBrushPoint({ x, y });
         }
       }
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setIsDragging(false);
       setIsErasing(false);
       
       if (isDrawingCircle) {
         setIsDrawingCircle(false);
         if (previewRadius > 10 && selectedFlower) {
-          const circumference = 2 * Math.PI * previewRadius;
-          const flowerSizeEstimate = 32; // px approximation
-          const count = Math.max(4, Math.floor(circumference / flowerSizeEstimate));
-          
-          useStore.getState().addRing({
-            size: previewRadius,
-            flowerName: selectedFlower,
-            flowerCount: count,
-            flowerSize: 1,
-            rotation: 0
-          });
+          if (selectedTool === 'Circle') {
+            const circumference = 2 * Math.PI * previewRadius;
+            const flowerSizeEstimate = 32;
+            const count = Math.max(4, Math.floor(circumference / flowerSizeEstimate));
+            
+            useStore.getState().addRing({
+              size: previewRadius,
+              flowerName: selectedFlower,
+              flowerCount: count,
+              flowerSize: 1,
+              rotation: 0
+            });
+          } else if (selectedTool === 'Polygon') {
+            const sides = 6; // Hexagon
+            const newElements = [];
+            const flowerSizeEstimate = 30;
+            const sideLength = 2 * previewRadius * Math.sin(Math.PI / sides);
+            const flowersPerSide = Math.max(1, Math.floor(sideLength / flowerSizeEstimate));
+            
+            for (let s = 0; s < sides; s++) {
+              const startAngle = (s * Math.PI * 2) / sides;
+              const endAngle = ((s + 1) * Math.PI * 2) / sides;
+              const startX = Math.cos(startAngle) * previewRadius;
+              const startY = Math.sin(startAngle) * previewRadius;
+              const endX = Math.cos(endAngle) * previewRadius;
+              const endY = Math.sin(endAngle) * previewRadius;
+              
+              for (let i = 0; i < flowersPerSide; i++) {
+                const t = i / flowersPerSide;
+                const x = startX + (endX - startX) * t;
+                const y = startY + (endY - startY) * t;
+                const angle = Math.atan2(endY - startY, endX - startX);
+                newElements.push({
+                  type: selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const,
+                  name: selectedFlower,
+                  x,
+                  y,
+                  rotation: angle * (180 / Math.PI) + 90,
+                  scale: 1
+                });
+              }
+            }
+            useStore.getState().addElements(newElements);
+          }
         }
         setPreviewRadius(0);
       }
@@ -375,17 +428,17 @@ export default function Canvas() {
     };
 
     if (isDragging || isDrawingCircle || isDrawingPath || isDrawingLine || isBrushing || isErasing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
     };
   }, [isDragging, isDrawingCircle, isDrawingPath, isDrawingLine, isBrushing, isErasing, previewRadius, pathPoints, lineStart, lineEnd, brushElements, lastBrushPoint, selectedElementId, selectedTool, dragOffset, updateElement, selectedFlower]);
 
-  const handleRotate = (e: MouseEvent, id: string, amount: number) => {
+  const handleRotate = (e: ReactPointerEvent, id: string, amount: number) => {
     e.stopPropagation();
     const el = elements.find(el => el.id === id);
     if (el) {
@@ -393,7 +446,7 @@ export default function Canvas() {
     }
   };
 
-  const handleCanvasMouseMove = (e: MouseEvent) => {
+  const handleCanvasPointerMove = (e: ReactPointerEvent) => {
     if (containerRef.current && (selectedTool === 'Brush' || selectedTool === 'Line' || selectedTool === 'Pen' || selectedTool === 'Circle' || selectedTool === 'SmallCircle')) {
       const rect = containerRef.current.getBoundingClientRect();
       const centerX = rect.width / 2;
@@ -408,9 +461,9 @@ export default function Canvas() {
     <div 
       className="relative flex items-center justify-center w-full h-full p-4 overflow-hidden"
       onClick={handleCanvasClick}
-      onMouseDown={handleCanvasMouseDown}
-      onMouseMove={handleCanvasMouseMove}
-      onMouseLeave={() => setMousePos(null)}
+      onPointerDown={handleCanvasPointerDown}
+      onPointerMove={handleCanvasPointerMove}
+      onPointerLeave={() => setMousePos(null)}
     >
       <div 
         id="pookalam-canvas"
@@ -420,11 +473,12 @@ export default function Canvas() {
           height: sizePx,
           maxWidth: '100%',
           maxHeight: '100%',
-          aspectRatio: '1/1'
+          aspectRatio: '1/1',
+          touchAction: 'none'
         }}
         className={cn(
           "rounded-full relative shadow-soft bg-white/10 backdrop-blur-sm border border-primary-green/20 transition-all duration-300",
-          (selectedTool === 'Circle' || selectedTool === 'SmallCircle' || selectedTool === 'Line' || selectedTool === 'Pen' || selectedTool === 'Brush') && "cursor-crosshair-black"
+          (selectedTool === 'Circle' || selectedTool === 'Polygon' || selectedTool === 'SmallCircle' || selectedTool === 'Line' || selectedTool === 'Pen' || selectedTool === 'Brush' || selectedTool === 'Mandala') && "cursor-crosshair-black"
         )}
       >
         {/* Grid Overlay */}
@@ -495,7 +549,7 @@ export default function Canvas() {
         ))}
 
         {/* Hover preview */}
-        {!isDragging && !isBrushing && !isDrawingLine && !isDrawingPath && !isDrawingCircle && mousePos && selectedFlower && selectedTool === 'Brush' && (
+        {!isDragging && !isBrushing && !isDrawingLine && !isDrawingPath && !isDrawingCircle && mousePos && selectedFlower && (selectedTool === 'Brush' || selectedTool === 'Mandala') && (
           <div
             className="absolute pointer-events-none opacity-40 flex items-center justify-center transition-all duration-75"
             style={{
@@ -523,15 +577,15 @@ export default function Canvas() {
           return (
             <div
               key={el.id}
-              onClick={(e) => handleElementClick(e, el.id)}
-              onMouseDown={(e) => handleElementMouseDown(e, el.id)}
-              onMouseEnter={() => {
+              onClick={(e) => handleElementClick(e as unknown as ReactPointerEvent, el.id)}
+              onPointerDown={(e) => handleElementPointerDown(e, el.id)}
+              onPointerEnter={() => {
                 setHoveredElementId(el.id);
                 if (selectedTool === 'Eraser' && isErasing) {
                   removeElement(el.id);
                 }
               }}
-              onMouseLeave={() => setHoveredElementId(null)}
+              onPointerLeave={() => setHoveredElementId(null)}
               style={{
                 position: 'absolute',
                 left: '50%',
@@ -558,10 +612,10 @@ export default function Canvas() {
               
               {isSelected && selectedTool === 'Select' && !isDragging && (
                 <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white rounded-md shadow-md p-1 border border-primary-green/20 z-50" onClick={e => e.stopPropagation()}>
-                  <button className="w-6 h-6 flex items-center justify-center text-xs hover:bg-primary-green/10 rounded" onClick={(e) => handleRotate(e, el.id, -15)}>↺</button>
-                  <button className="w-6 h-6 flex items-center justify-center text-xs hover:bg-primary-green/10 rounded" onClick={(e) => handleRotate(e, el.id, 15)}>↻</button>
+                  <button className="w-6 h-6 flex items-center justify-center text-xs hover:bg-primary-green/10 rounded" onPointerDown={(e) => handleRotate(e, el.id, -15)}>↺</button>
+                  <button className="w-6 h-6 flex items-center justify-center text-xs hover:bg-primary-green/10 rounded" onPointerDown={(e) => handleRotate(e, el.id, 15)}>↻</button>
                   <div className="w-px h-4 bg-accent-brown/20" />
-                  <button className="w-6 h-6 flex items-center justify-center text-xs text-red-500 hover:bg-red-50 rounded" onClick={(e) => { e.stopPropagation(); removeElement(el.id); }}>×</button>
+                  <button className="w-6 h-6 flex items-center justify-center text-xs text-red-500 hover:bg-red-50 rounded" onPointerDown={(e) => { e.stopPropagation(); removeElement(el.id); }}>×</button>
                 </div>
               )}
             </div>

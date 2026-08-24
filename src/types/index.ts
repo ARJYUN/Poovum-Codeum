@@ -39,7 +39,7 @@ export interface DesignState {
   tags: string[];
 }
 
-export type ToolType = 'Select' | 'Brush' | 'Circle' | 'SmallCircle' | 'Pen' | 'Line' | 'Eraser';
+export type ToolType = 'Select' | 'Brush' | 'Circle' | 'SmallCircle' | 'Pen' | 'Line' | 'Eraser' | 'Mandala' | 'Polygon';
 
 export interface AppState extends DesignState {
   selectedTool: ToolType;
