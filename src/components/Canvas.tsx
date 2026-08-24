@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, MouseEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useStore } from '../store/useStore';
 import { cn } from '../utils/cn';
 import type { PookalamElement } from '../types';
@@ -86,7 +86,7 @@ export default function Canvas() {
       const flowerCount = 6;
       const radius = 25;
       
-      const newElements = [];
+      const newElements: any[] = [];
       const angleStep = (Math.PI * 2) / flowerCount;
       
       for (let i = 0; i < flowerCount; i++) {
@@ -134,7 +134,7 @@ export default function Canvas() {
         const y = e.clientY - rect.top - centerY;
         
         const type = selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const;
-        const newElements = [];
+        const newElements: any[] = [];
         
         if (selectedTool === 'Mandala') {
           const symmetries = 8;
@@ -255,7 +255,7 @@ export default function Canvas() {
         
         if (dist >= 30) {
           const type = selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const;
-          const newElements = [];
+          const newElements: any[] = [];
           
           if (selectedTool === 'Mandala') {
             const symmetries = 8;
@@ -296,7 +296,7 @@ export default function Canvas() {
             });
           } else if (selectedTool === 'Polygon') {
             const sides = 6; // Hexagon
-            const newElements = [];
+            const newElements: Omit<PookalamElement, 'id'>[] = [];
             const flowerSizeEstimate = 30;
             const sideLength = 2 * previewRadius * Math.sin(Math.PI / sides);
             const flowersPerSide = Math.max(1, Math.floor(sideLength / flowerSizeEstimate));
@@ -349,7 +349,7 @@ export default function Canvas() {
           
           const FLOWER_SPACING = 30; // space between flowers
           const numFlowers = Math.floor(totalLength / FLOWER_SPACING);
-          const newElements = [];
+          const newElements: any[] = [];
           
           for (let i = 0; i <= numFlowers; i++) {
             const targetDist = i * FLOWER_SPACING;
@@ -389,7 +389,7 @@ export default function Canvas() {
         if (len > 10) {
           const FLOWER_SPACING = 30; // space between flowers
           const numFlowers = Math.floor(len / FLOWER_SPACING);
-          const newElements = [];
+          const newElements: any[] = [];
           
           for (let i = 0; i <= numFlowers; i++) {
             const ratio = numFlowers === 0 ? 0 : i / numFlowers;
