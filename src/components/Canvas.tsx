@@ -544,7 +544,7 @@ export default function Canvas() {
               zIndex: 50
             }}
           >
-            <img src={FLOWER_MAP[el.name]} alt={el.name} className="w-12 h-12 object-contain" />
+            <img src={FLOWER_MAP[el.name]} alt={el.name} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
           </div>
         ))}
 
@@ -559,7 +559,7 @@ export default function Canvas() {
               zIndex: 100
             }}
           >
-            <img src={FLOWER_MAP[selectedFlower]} alt="preview" className="w-12 h-12 object-contain" />
+            <img src={FLOWER_MAP[selectedFlower]} alt="preview" className="w-8 h-8 md:w-12 md:h-12 object-contain" />
           </div>
         )}
 
@@ -605,7 +605,7 @@ export default function Canvas() {
               )}
             >
               {FLOWER_MAP[el.name]?.startsWith('/') ? (
-                <img src={FLOWER_MAP[el.name]} alt={el.name} className="w-12 h-12 object-contain pointer-events-none" />
+                <img src={FLOWER_MAP[el.name]} alt={el.name} className="w-8 h-8 md:w-12 md:h-12 object-contain pointer-events-none" />
               ) : (
                 FLOWER_MAP[el.name] || '🌼'
               )}

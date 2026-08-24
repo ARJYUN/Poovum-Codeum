@@ -25,7 +25,7 @@ export default function SidebarRight() {
         </div>
         
         {/* Grid */}
-        <div className="flex-1 overflow-y-auto p-2 grid grid-cols-4 gap-1 min-h-[200px]">
+        <div className="flex-1 overflow-y-auto p-2 grid grid-cols-6 lg:grid-cols-4 gap-1 min-h-[200px]">
           {flowers.map(item => (
             <button
               key={item.id}
@@ -43,7 +43,7 @@ export default function SidebarRight() {
             >
               <span className="text-xl flex items-center justify-center">
                 {item.icon.startsWith('/') ? (
-                  <img src={item.icon} alt={item.name} className="w-8 h-8 object-contain pointer-events-none" />
+                  <img src={item.icon} alt={item.name} className="w-6 h-6 md:w-8 md:h-8 object-contain pointer-events-none" />
                 ) : (
                   item.icon
                 )}
