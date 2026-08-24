@@ -62,6 +62,46 @@ export default function Workspace({ onBloom }: WorkspaceProps) {
     }
   };
 
+  const handlePublish = async () => {
+    const canvasElement = document.getElementById('pookalam-canvas');
+    if (!canvasElement) return;
+
+    try {
+      const originalGridState = showGrid;
+      if (showGrid) toggleGrid();
+      
+      const dataUrl = await htmlToImage.toPng(canvasElement, { 
+        pixelRatio: 1, 
+        backgroundColor: 'transparent',
+        style: {
+          borderRadius: '50%',
+          overflow: 'hidden',
+          boxShadow: 'none',
+          transform: 'none'
+        }
+      });
+      
+      if (originalGridState) toggleGrid();
+
+      const designNameInput = prompt("Enter a name for your Pookalam:", useStore.getState().designName || "My Pookalam");
+      if (designNameInput === null) return;
+
+      const creatorName = prompt("Enter your name:", "Anonymous");
+      if (creatorName !== null) {
+        useStore.getState().addGalleryDesign({
+          id: Date.now().toString(),
+          name: designNameInput || 'My Pookalam',
+          creator: creatorName || 'Anonymous',
+          likes: 0,
+          image: dataUrl
+        });
+        alert("Design successfully published to the Gallery!");
+      }
+    } catch (err) {
+      console.error('Failed to publish image', err);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col w-full h-full bg-[#FFF9ED]/95 backdrop-blur-sm border border-[#E8DFCE] rounded-lg overflow-hidden shadow-sm">
 
@@ -118,6 +158,12 @@ export default function Workspace({ onBloom }: WorkspaceProps) {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2 w-full lg:w-auto mt-2 lg:mt-0">
+          <button 
+            onClick={handlePublish}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-[#3A5A34] border border-[#3A5A34] rounded text-[11px] font-bold hover:bg-[#F5F9F4] transition-colors shadow-sm"
+          >
+            Publish to Gallery
+          </button>
           <button 
             onClick={handleExport}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-[#3A5A34] text-white rounded text-[11px] font-bold hover:bg-[#2A4B26] transition-colors shadow-sm"

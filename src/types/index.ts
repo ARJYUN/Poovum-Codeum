@@ -11,6 +11,14 @@ export interface PookalamElement {
   ringId?: string; // If it belongs to a ring
 }
 
+export interface GalleryDesign {
+  id: string | number;
+  name: string;
+  creator: string;
+  likes: number;
+  image: string;
+}
+
 export interface Ring {
   id: string;
   size: number; // Radius
@@ -31,7 +39,7 @@ export interface DesignState {
   tags: string[];
 }
 
-export type ToolType = 'Select' | 'Place' | 'Circle' | 'SmallCircle' | 'Pen' | 'Eraser';
+export type ToolType = 'Select' | 'Brush' | 'Circle' | 'SmallCircle' | 'Pen' | 'Line' | 'Eraser';
 
 export interface AppState extends DesignState {
   selectedTool: ToolType;
@@ -64,4 +72,7 @@ export interface AppState extends DesignState {
   setDesignInfo: (info: { name?: string; description?: string; tags?: string[] }) => void;
   loadTemplate: (template: DesignState) => void;
   clearCanvas: () => void;
+  
+  galleryDesigns: GalleryDesign[];
+  addGalleryDesign: (design: GalleryDesign) => void;
 }

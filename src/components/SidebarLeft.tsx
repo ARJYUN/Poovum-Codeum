@@ -8,14 +8,17 @@ import {
   CircleDashed,
   Circle,
   Flower2,
-  PenTool,
-  Trash2
+  Trash2,
+  Minus,
+  Paintbrush,
+  PenTool
 } from 'lucide-react';
 import type { ToolType } from '../types';
 
 const tools: { id: ToolType; icon: any; label: string }[] = [
   { id: 'Select', icon: Move, label: 'Move Elements' },
-  { id: 'Place', icon: Flower2, label: 'Place Flower' },
+  { id: 'Brush', icon: Paintbrush, label: 'Brush Tool' },
+  { id: 'Line', icon: Minus, label: 'Draw Line' },
   { id: 'Circle', icon: CircleDashed, label: 'Big Circle' },
   { id: 'SmallCircle', icon: Circle, label: 'Small Circle' },
   { id: 'Pen', icon: PenTool, label: 'Draw Path' },
@@ -33,7 +36,7 @@ export default function SidebarLeft() {
   const history = useStore(state => state.history);
 
   return (
-    <div className="flex flex-row lg:flex-col items-center justify-center gap-2 bg-[#FFF9ED]/95 backdrop-blur-sm border border-[#E8DFCE] shadow-sm rounded-lg p-2 w-full lg:w-14 overflow-x-auto shrink-0">
+    <div className="flex flex-row lg:flex-col items-center justify-start lg:justify-center gap-2 bg-[#FFF9ED]/95 backdrop-blur-sm border border-[#E8DFCE] shadow-sm rounded-lg p-2 w-full lg:w-14 overflow-x-auto shrink-0 no-scrollbar">
       {tools.map(tool => (
         <button
           key={tool.id}

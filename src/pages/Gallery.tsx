@@ -1,10 +1,7 @@
+import { useStore } from '../store/useStore';
+
 export default function Gallery() {
-  const designs = [
-    { id: 1, name: 'Onam Sunrise', creator: 'Arjun', likes: 128, image: '/gallery/o1.png' },
-    { id: 2, name: 'Traditional Vibes', creator: 'Meera', likes: 95, image: '/gallery/o2.png' },
-    { id: 3, name: 'Minimal Pookalam', creator: 'Rahul', likes: 64, image: '/gallery/o3.png' },
-    { id: 4, name: 'Kerala Mural', creator: 'Sneha', likes: 210, image: '/gallery/o4.png' },
-  ];
+  const designs = useStore(state => state.galleryDesigns);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 w-full">

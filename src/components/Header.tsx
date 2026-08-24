@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 export default function Header() {
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Designer', path: '/designer' },
+    { name: 'Design', path: '/designer' },
     { name: 'Gallery', path: '/gallery' },
     { name: 'About Onam', path: '/about' },
   ];

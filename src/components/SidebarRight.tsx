@@ -84,7 +84,7 @@ export default function SidebarRight() {
               title={item.name}
               onClick={() => {
                 selectFlower(item.name);
-                if (selectedTool !== 'Place' && selectedTool !== 'Circle') setTool('Place');
+                if (selectedTool !== 'Brush' && selectedTool !== 'Circle' && selectedTool !== 'SmallCircle' && selectedTool !== 'Line' && selectedTool !== 'Pen') setTool('Brush');
               }}
               className={cn(
                 "flex items-center justify-center aspect-square rounded-md border transition-all duration-150",

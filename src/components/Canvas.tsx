@@ -35,7 +35,16 @@ export default function Canvas() {
   const [isDrawingPath, setIsDrawingPath] = useState(false);
   const [pathPoints, setPathPoints] = useState<{x: number, y: number}[]>([]);
 
+  const [isDrawingLine, setIsDrawingLine] = useState(false);
+  const [lineStart, setLineStart] = useState<{x: number, y: number} | null>(null);
+  const [lineEnd, setLineEnd] = useState<{x: number, y: number} | null>(null);
+
+  const [isBrushing, setIsBrushing] = useState(false);
+  const [brushElements, setBrushElements] = useState<Omit<PookalamElement, 'id'>[]>([]);
+  const [lastBrushPoint, setLastBrushPoint] = useState<{x: number, y: number} | null>(null);
+
   const [isErasing, setIsErasing] = useState(false);
+  const [mousePos, setMousePos] = useState<{x: number, y: number} | null>(null);
 
   const getCanvasPxSize = () => {
     switch (canvasSize) {
@@ -101,40 +110,41 @@ export default function Canvas() {
         const y = e.clientY - rect.top - centerY;
         setPathPoints([{ x, y }]);
       }
+    } else if (selectedTool === 'Line' && selectedFlower) {
+      setIsDrawingLine(true);
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const x = e.clientX - rect.left - centerX;
+        const y = e.clientY - rect.top - centerY;
+        setLineStart({ x, y });
+        setLineEnd({ x, y });
+      }
+    } else if (selectedTool === 'Brush' && selectedFlower) {
+      if (containerRef.current) {
+        setIsBrushing(true);
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const x = e.clientX - rect.left - centerX;
+        const y = e.clientY - rect.top - centerY;
+        
+        const newEl = {
+          type: selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const,
+          name: selectedFlower,
+          x, y,
+          rotation: Math.random() * 360,
+          scale: 1
+        };
+        setBrushElements([newEl]);
+        setLastBrushPoint({ x, y });
+      }
     }
   };
 
   const handleCanvasClick = (e: MouseEvent) => {
-    if (selectedTool === 'Place' && selectedFlower) {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      
-      const x = e.clientX - rect.left - centerX;
-      const y = e.clientY - rect.top - centerY;
-      
-      useStore.getState().addElement({
-        type: selectedFlower.includes('Leaf') ? 'leaf' : 'flower',
-        name: selectedFlower,
-        x,
-        y,
-        rotation: 0,
-        scale: 1
-      });
-      
-      // Small bloom effect
-      confetti({
-        particleCount: 15,
-        spread: 40,
-        origin: { 
-          x: e.clientX / window.innerWidth,
-          y: e.clientY / window.innerHeight
-        },
-        colors: ['#315C2B', '#D99A20', '#E87919'],
-        disableForReducedMotion: true
-      });
-    } else if (selectedTool === 'Select' && !hoveredElementId) {
+    if (selectedTool === 'Select' && !hoveredElementId) {
        selectElement(null);
     }
   };
@@ -211,6 +221,39 @@ export default function Canvas() {
           return prev;
         });
       }
+
+      if (isDrawingLine && containerRef.current && lineStart) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const x = e.clientX - rect.left - centerX;
+        const y = e.clientY - rect.top - centerY;
+        setLineEnd({ x, y });
+      }
+
+      if (isBrushing && containerRef.current && lastBrushPoint && selectedFlower) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const x = e.clientX - rect.left - centerX;
+        const y = e.clientY - rect.top - centerY;
+        
+        const dx = x - lastBrushPoint.x;
+        const dy = y - lastBrushPoint.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist >= 30) {
+          const newEl = {
+            type: selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const,
+            name: selectedFlower,
+            x, y,
+            rotation: Math.random() * 360,
+            scale: 1
+          };
+          setBrushElements(prev => [...prev, newEl]);
+          setLastBrushPoint({ x, y });
+        }
+      }
     };
 
     const handleMouseUp = () => {
@@ -284,9 +327,55 @@ export default function Canvas() {
         }
         setPathPoints([]);
       }
+
+      if (isDrawingLine && lineStart && lineEnd && selectedFlower) {
+        setIsDrawingLine(false);
+        const dx = lineEnd.x - lineStart.x;
+        const dy = lineEnd.y - lineStart.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        
+        if (len > 10) {
+          const FLOWER_SPACING = 30; // space between flowers
+          const numFlowers = Math.floor(len / FLOWER_SPACING);
+          const newElements = [];
+          
+          for (let i = 0; i <= numFlowers; i++) {
+            const ratio = numFlowers === 0 ? 0 : i / numFlowers;
+            const x = lineStart.x + dx * ratio;
+            const y = lineStart.y + dy * ratio;
+            
+            const angle = Math.atan2(dy, dx);
+            const rotation = angle * (180 / Math.PI) + 90;
+            
+            newElements.push({
+              type: selectedFlower.includes('Leaf') ? 'leaf' as const : 'flower' as const,
+              name: selectedFlower,
+              x,
+              y,
+              rotation,
+              scale: 1
+            });
+          }
+          
+          if (newElements.length > 0) {
+            useStore.getState().addElements(newElements);
+          }
+        }
+        setLineStart(null);
+        setLineEnd(null);
+      }
+
+      if (isBrushing) {
+        setIsBrushing(false);
+        if (brushElements.length > 0) {
+          useStore.getState().addElements(brushElements);
+        }
+        setBrushElements([]);
+        setLastBrushPoint(null);
+      }
     };
 
-    if (isDragging || isDrawingCircle || isDrawingPath || isErasing) {
+    if (isDragging || isDrawingCircle || isDrawingPath || isDrawingLine || isBrushing || isErasing) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     }
@@ -295,7 +384,7 @@ export default function Canvas() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isDrawingCircle, isDrawingPath, isErasing, previewRadius, pathPoints, selectedElementId, selectedTool, dragOffset, updateElement, selectedFlower]);
+  }, [isDragging, isDrawingCircle, isDrawingPath, isDrawingLine, isBrushing, isErasing, previewRadius, pathPoints, lineStart, lineEnd, brushElements, lastBrushPoint, selectedElementId, selectedTool, dragOffset, updateElement, selectedFlower]);
 
   const handleRotate = (e: MouseEvent, id: string, amount: number) => {
     e.stopPropagation();
@@ -305,11 +394,24 @@ export default function Canvas() {
     }
   };
 
+  const handleCanvasMouseMove = (e: MouseEvent) => {
+    if (containerRef.current && (selectedTool === 'Brush' || selectedTool === 'Line' || selectedTool === 'Pen' || selectedTool === 'Circle' || selectedTool === 'SmallCircle')) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const x = e.clientX - rect.left - centerX;
+      const y = e.clientY - rect.top - centerY;
+      setMousePos({ x, y });
+    }
+  };
+
   return (
     <div 
       className="relative flex items-center justify-center w-full h-full p-4 overflow-hidden"
       onClick={handleCanvasClick}
       onMouseDown={handleCanvasMouseDown}
+      onMouseMove={handleCanvasMouseMove}
+      onMouseLeave={() => setMousePos(null)}
     >
       <div 
         id="pookalam-canvas"
@@ -323,8 +425,7 @@ export default function Canvas() {
         }}
         className={cn(
           "rounded-full relative shadow-soft bg-white/10 backdrop-blur-sm border border-primary-green/20 transition-all duration-300",
-          selectedTool === 'Place' && "cursor-crosshair",
-          (selectedTool === 'Circle' || selectedTool === 'SmallCircle') && "cursor-crosshair"
+          (selectedTool === 'Circle' || selectedTool === 'SmallCircle' || selectedTool === 'Line' || selectedTool === 'Pen' || selectedTool === 'Brush') && "cursor-crosshair-black"
         )}
       >
         {/* Grid Overlay */}
@@ -349,17 +450,64 @@ export default function Canvas() {
           />
         )}
 
+        {/* Preview Line */}
+        {isDrawingLine && lineStart && lineEnd && (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 100 }}>
+            <line
+              x1={lineStart.x + sizePx/2}
+              y1={lineStart.y + sizePx/2}
+              x2={lineEnd.x + sizePx/2}
+              y2={lineEnd.y + sizePx/2}
+              stroke="rgba(42, 75, 38, 0.5)"
+              strokeWidth="2"
+              strokeDasharray="4 4"
+            />
+          </svg>
+        )}
+
         {/* Preview Pen Path */}
         {isDrawingPath && pathPoints.length > 1 && (
           <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 100 }}>
-            <polyline
-              points={pathPoints.map(p => `${p.x + sizePx/2},${p.y + sizePx/2}`).join(' ')}
+            <path
+              d={`M ${pathPoints[0].x + sizePx/2} ${pathPoints[0].y + sizePx/2} ` + 
+                 pathPoints.slice(1).map(p => `L ${p.x + sizePx/2} ${p.y + sizePx/2}`).join(' ')}
               fill="none"
               stroke="rgba(42, 75, 38, 0.5)"
               strokeWidth="2"
               strokeDasharray="4 4"
             />
           </svg>
+        )}
+
+        {/* Live Brush Elements preview */}
+        {brushElements.map((el, index) => (
+          <div
+            key={`brush-${index}`}
+            className="absolute pointer-events-none drop-shadow-md opacity-80 flex items-center justify-center"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: `translate(calc(-50% + ${el.x}px), calc(-50% + ${el.y}px)) rotate(${el.rotation}deg) scale(${el.scale})`,
+              zIndex: 50
+            }}
+          >
+            <img src={FLOWER_MAP[el.name]} alt={el.name} className="w-12 h-12 object-contain" />
+          </div>
+        ))}
+
+        {/* Hover preview */}
+        {!isDragging && !isBrushing && !isDrawingLine && !isDrawingPath && !isDrawingCircle && mousePos && selectedFlower && selectedTool === 'Brush' && (
+          <div
+            className="absolute pointer-events-none opacity-40 flex items-center justify-center transition-all duration-75"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: `translate(calc(-50% + ${mousePos.x}px), calc(-50% + ${mousePos.y}px)) scale(1)`,
+              zIndex: 100
+            }}
+          >
+            <img src={FLOWER_MAP[selectedFlower]} alt="preview" className="w-12 h-12 object-contain" />
+          </div>
         )}
 
         {elements.length === 0 && (

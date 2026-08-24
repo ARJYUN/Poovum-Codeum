@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { AppState, DesignState, PookalamElement, Ring } from '../types';
 
 const initialState: DesignState = {
@@ -14,142 +15,158 @@ const initialState: DesignState = {
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-export const useStore = create<AppState>((set, get) => ({
-  ...initialState,
-  selectedTool: 'Select',
-  selectedFlower: 'Flower 1',
-  selectedElementId: null,
-  history: [initialState],
-  historyIndex: 0,
+export const useStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
+      selectedTool: 'Select',
+      selectedFlower: 'Flower 1',
+      selectedElementId: null,
+      history: [initialState],
+      historyIndex: 0,
+      
+      galleryDesigns: [
+        { id: '2', name: 'Traditional Vibes', creator: 'Abhinav', likes: 95, image: '/gallery/o2.png' },
+        { id: '1', name: 'Onam Sunrise', creator: 'Arjun', likes: 128, image: '/gallery/o1.png' },
+        { id: '3', name: 'Minimal Pookalam', creator: 'Swetha', likes: 230, image: '/gallery/o3.png' },
+        { id: '4', name: 'Kerala Mural', creator: 'Adarsh', likes: 210, image: '/gallery/o4.png' },
+      ],
 
-  setTool: (tool) => set({ selectedTool: tool }),
-  selectFlower: (flowerName) => set({ selectedFlower: flowerName }),
-  selectElement: (id) => set({ selectedElementId: id }),
-  setCanvasSize: (size) => set({ canvasSize: size }),
-  setBackground: (bg) => set({ background: bg }),
-  toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+      addGalleryDesign: (design) => set((state) => ({ galleryDesigns: [design, ...state.galleryDesigns] })),
 
-  addElement: (elementData) => set((state) => {
-    const newElement: PookalamElement = { ...elementData, id: generateId() };
-    const newElements = [...state.elements, newElement];
-    const newState = { elements: newElements };
-    return updateHistory(state, newState);
-  }),
+      setTool: (tool) => set({ selectedTool: tool }),
+      selectFlower: (flowerName) => set({ selectedFlower: flowerName }),
+      selectElement: (id) => set({ selectedElementId: id }),
+      setCanvasSize: (size) => set({ canvasSize: size }),
+      setBackground: (bg) => set({ background: bg }),
+      toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
 
-  addElements: (elementsData) => set((state) => {
-    const newElementsArray = elementsData.map(data => ({ ...data, id: generateId() }));
-    const newElements = [...state.elements, ...newElementsArray];
-    return updateHistory(state, { elements: newElements });
-  }),
+      addElement: (elementData) => set((state) => {
+        const newElement: PookalamElement = { ...elementData, id: generateId() };
+        const newElements = [...state.elements, newElement];
+        const newState = { elements: newElements };
+        return updateHistory(state, newState);
+      }),
 
-  updateElement: (id, updates) => set((state) => {
-    const newElements = state.elements.map((el) => 
-      el.id === id ? { ...el, ...updates } : el
-    );
-    return updateHistory(state, { elements: newElements });
-  }),
+      addElements: (elementsData) => set((state) => {
+        const newElementsArray = elementsData.map(data => ({ ...data, id: generateId() }));
+        const newElements = [...state.elements, ...newElementsArray];
+        return updateHistory(state, { elements: newElements });
+      }),
 
-  removeElement: (id) => set((state) => {
-    const newElements = state.elements.filter((el) => el.id !== id);
-    return updateHistory(state, { 
-      elements: newElements,
-      selectedElementId: state.selectedElementId === id ? null : state.selectedElementId
-    });
-  }),
+      updateElement: (id, updates) => set((state) => {
+        const newElements = state.elements.map((el) => 
+          el.id === id ? { ...el, ...updates } : el
+        );
+        return updateHistory(state, { elements: newElements });
+      }),
 
-  duplicateElement: (id) => set((state) => {
-    const element = state.elements.find((el) => el.id === id);
-    if (!element) return state;
-    
-    const newElement: PookalamElement = {
-      ...element,
-      id: generateId(),
-      x: element.x + 20,
-      y: element.y + 20,
-    };
-    
-    const newElements = [...state.elements, newElement];
-    return updateHistory(state, { 
-      elements: newElements,
-      selectedElementId: newElement.id
-    });
-  }),
+      removeElement: (id) => set((state) => {
+        const newElements = state.elements.filter((el) => el.id !== id);
+        return updateHistory(state, { 
+          elements: newElements,
+          selectedElementId: state.selectedElementId === id ? null : state.selectedElementId
+        });
+      }),
 
-  addRing: (ringData) => set((state) => {
-    const newRing: Ring = { ...ringData, id: generateId() };
-    const newRings = [...state.rings, newRing];
-    // Generate elements for the ring
-    const ringElements: PookalamElement[] = [];
-    const angleStep = (Math.PI * 2) / newRing.flowerCount;
-    
-    for (let i = 0; i < newRing.flowerCount; i++) {
-      const angle = i * angleStep + (newRing.rotation * Math.PI / 180);
-      ringElements.push({
-        id: generateId(),
-        type: 'flower',
-        name: newRing.flowerName,
-        x: Math.cos(angle) * newRing.size,
-        y: Math.sin(angle) * newRing.size,
-        rotation: angle * (180 / Math.PI) + 90, // point outward
-        scale: newRing.flowerSize,
-        ringId: newRing.id
-      });
+      duplicateElement: (id) => set((state) => {
+        const element = state.elements.find((el) => el.id === id);
+        if (!element) return state;
+        
+        const newElement: PookalamElement = {
+          ...element,
+          id: generateId(),
+          x: element.x + 20,
+          y: element.y + 20,
+        };
+        
+        const newElements = [...state.elements, newElement];
+        return updateHistory(state, { 
+          elements: newElements,
+          selectedElementId: newElement.id
+        });
+      }),
+
+      addRing: (ringData) => set((state) => {
+        const newRing: Ring = { ...ringData, id: generateId() };
+        const newRings = [...state.rings, newRing];
+        // Generate elements for the ring
+        const ringElements: PookalamElement[] = [];
+        const angleStep = (Math.PI * 2) / newRing.flowerCount;
+        
+        for (let i = 0; i < newRing.flowerCount; i++) {
+          const angle = i * angleStep + (newRing.rotation * Math.PI / 180);
+          ringElements.push({
+            id: generateId(),
+            type: 'flower',
+            name: newRing.flowerName,
+            x: Math.cos(angle) * newRing.size,
+            y: Math.sin(angle) * newRing.size,
+            rotation: angle * (180 / Math.PI) + 90, // point outward
+            scale: newRing.flowerSize,
+            ringId: newRing.id
+          });
+        }
+        
+        return updateHistory(state, { 
+          rings: newRings,
+          elements: [...state.elements, ...ringElements]
+        });
+      }),
+
+      updateRing: (id, updates) => set((state) => {
+        const newRings = state.rings.map(r => r.id === id ? { ...r, ...updates } : r);
+        return updateHistory(state, { rings: newRings });
+      }),
+
+      removeRing: (id) => set((state) => {
+        const newRings = state.rings.filter(r => r.id !== id);
+        const newElements = state.elements.filter(el => el.ringId !== id);
+        return updateHistory(state, { rings: newRings, elements: newElements });
+      }),
+
+      undo: () => set((state) => {
+        if (state.historyIndex > 0) {
+          const newIndex = state.historyIndex - 1;
+          const previousState = state.history[newIndex];
+          return {
+            ...previousState,
+            historyIndex: newIndex,
+            selectedElementId: null
+          };
+        }
+        return state;
+      }),
+
+      redo: () => set((state) => {
+        if (state.historyIndex < state.history.length - 1) {
+          const newIndex = state.historyIndex + 1;
+          const nextState = state.history[newIndex];
+          return {
+            ...nextState,
+            historyIndex: newIndex,
+            selectedElementId: null
+          };
+        }
+        return state;
+      }),
+
+      setDesignInfo: (info) => set((state) => ({ ...state, ...info })),
+
+      loadTemplate: (template) => set((state) => {
+        return updateHistory(state, template);
+      }),
+
+      clearCanvas: () => set((state) => {
+        return updateHistory(state, { elements: [], rings: [] });
+      })
+    }),
+    {
+      name: 'poovum-codeum-storage-v2', // Changed from v1 to bust cache and apply new default order
+      partialize: (state) => ({ galleryDesigns: state.galleryDesigns }),
     }
-    
-    return updateHistory(state, { 
-      rings: newRings,
-      elements: [...state.elements, ...ringElements]
-    });
-  }),
-
-  updateRing: (id, updates) => set((state) => {
-    // This is more complex in reality: we'd need to recreate the ring's elements.
-    const newRings = state.rings.map(r => r.id === id ? { ...r, ...updates } : r);
-    return updateHistory(state, { rings: newRings });
-  }),
-
-  removeRing: (id) => set((state) => {
-    const newRings = state.rings.filter(r => r.id !== id);
-    const newElements = state.elements.filter(el => el.ringId !== id);
-    return updateHistory(state, { rings: newRings, elements: newElements });
-  }),
-
-  undo: () => set((state) => {
-    if (state.historyIndex > 0) {
-      const newIndex = state.historyIndex - 1;
-      const previousState = state.history[newIndex];
-      return {
-        ...previousState,
-        historyIndex: newIndex,
-        selectedElementId: null
-      };
-    }
-    return state;
-  }),
-
-  redo: () => set((state) => {
-    if (state.historyIndex < state.history.length - 1) {
-      const newIndex = state.historyIndex + 1;
-      const nextState = state.history[newIndex];
-      return {
-        ...nextState,
-        historyIndex: newIndex,
-        selectedElementId: null
-      };
-    }
-    return state;
-  }),
-
-  setDesignInfo: (info) => set((state) => ({ ...state, ...info })),
-
-  loadTemplate: (template) => set((state) => {
-    return updateHistory(state, template);
-  }),
-
-  clearCanvas: () => set((state) => {
-    return updateHistory(state, { elements: [], rings: [] });
-  })
-}));
+  )
+);
 
 // Helper to manage history
 function updateHistory(state: AppState, newState: Partial<DesignState>): Partial<AppState> {
