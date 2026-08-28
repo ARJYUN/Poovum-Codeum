@@ -39,7 +39,7 @@ export default function Workspace({ onBloom }: WorkspaceProps) {
       if (showGrid) toggleGrid();
       
       const dataUrl = await htmlToImage.toPng(canvasElement, { 
-        pixelRatio: 1, 
+        pixelRatio: 3, 
         backgroundColor: 'transparent',
         style: {
           borderRadius: '50%',
@@ -71,7 +71,7 @@ export default function Workspace({ onBloom }: WorkspaceProps) {
       if (showGrid) toggleGrid();
       
       const dataUrl = await htmlToImage.toPng(canvasElement, { 
-        pixelRatio: 1, 
+        pixelRatio: 3, 
         backgroundColor: 'transparent',
         style: {
           borderRadius: '50%',

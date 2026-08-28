@@ -12,7 +12,8 @@ import {
   Paintbrush,
   PenTool,
   Snowflake,
-  Hexagon
+  Hexagon,
+  Wand2
 } from 'lucide-react';
 import type { ToolType } from '../types';
 
@@ -37,6 +38,50 @@ export default function SidebarLeft() {
   const clearCanvas = useStore(state => state.clearCanvas);
   const historyIndex = useStore(state => state.historyIndex);
   const history = useStore(state => state.history);
+
+  const handleAutoGenerate = () => {
+    if (!confirm('This will clear your current canvas and auto-generate a new Pookalam. Continue?')) return;
+    
+    clearCanvas();
+    
+    // Small delay to ensure clear completes before adding new
+    setTimeout(() => {
+      const store = useStore.getState();
+      const flowers = Array.from({ length: 23 }, (_, i) => `Flower ${i + 1}`);
+      
+      const numRings = 9;
+      const baseRadius = 32; 
+      
+      // Outside in
+      for (let r = numRings; r >= 1; r--) {
+        const radius = r * baseRadius;
+        const flowerName = flowers[Math.floor(Math.random() * flowers.length)];
+        
+        const circumference = 2 * Math.PI * radius;
+        const flowerSizeEstimate = 32;
+        const count = Math.max(6, Math.floor(circumference / flowerSizeEstimate));
+        
+        store.addRing({
+          size: radius,
+          flowerName: flowerName,
+          flowerCount: count,
+          flowerSize: 1,
+          rotation: Math.random() * 360
+        });
+      }
+      
+      // Center piece
+      store.addElements([{
+        id: Math.random().toString(36).substring(2, 9),
+        type: 'flower',
+        name: flowers[Math.floor(Math.random() * flowers.length)],
+        x: 0,
+        y: 0,
+        rotation: Math.random() * 360,
+        scale: 1.2
+      }]);
+    }, 50);
+  };
 
   return (
     <div className="flex flex-row lg:flex-col items-center justify-start lg:justify-center gap-2 bg-[#FFF9ED]/95 backdrop-blur-sm border border-[#E8DFCE] shadow-sm rounded-lg p-2 w-full lg:w-14 overflow-x-auto shrink-0 no-scrollbar">
@@ -87,6 +132,16 @@ export default function SidebarLeft() {
         className="flex shrink-0 items-center justify-center w-10 h-10 rounded-md text-[#C84630] hover:bg-red-50"
       >
         <Trash2 size={20} strokeWidth={1.5} />
+      </button>
+
+      <div className="w-px h-8 lg:w-8 lg:h-px shrink-0 bg-[#E8DFCE] my-0 mx-1 lg:mx-0 lg:my-1" />
+
+      <button
+        onClick={handleAutoGenerate}
+        title="Magic Auto-Generate"
+        className="flex shrink-0 items-center justify-center w-10 h-10 rounded-md text-[#E0A800] hover:bg-yellow-50/50 hover:text-yellow-600 shadow-sm border border-yellow-200/50"
+      >
+        <Wand2 size={20} strokeWidth={1.5} />
       </button>
     </div>
   );
