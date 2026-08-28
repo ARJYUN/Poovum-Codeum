@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { useStore } from '../store/useStore';
 import { cn } from '../utils/cn';
 import { 
@@ -49,8 +50,12 @@ export default function SidebarLeft() {
       const store = useStore.getState();
       const flowers = Array.from({ length: 23 }, (_, i) => `Flower ${i + 1}`);
       
-      const numRings = 9;
+      let maxRadius = 300; // Medium (600/2)
+      if (store.canvasSize === 'Small') maxRadius = 200;
+      else if (store.canvasSize === 'Large') maxRadius = 350;
+      
       const baseRadius = 32; 
+      const numRings = Math.floor(maxRadius / baseRadius);
       
       // Outside in
       for (let r = numRings; r >= 1; r--) {
@@ -85,19 +90,29 @@ export default function SidebarLeft() {
   return (
     <div className="flex flex-row lg:flex-col items-center justify-start lg:justify-center gap-2 bg-[#FFF9ED]/95 backdrop-blur-sm border border-[#E8DFCE] shadow-sm rounded-lg p-2 w-full lg:w-14 overflow-x-auto shrink-0 no-scrollbar">
       {tools.map(tool => (
-        <button
-          key={tool.id}
-          onClick={() => setTool(tool.id)}
-          title={tool.label}
-          className={cn(
-            "flex shrink-0 items-center justify-center w-10 h-10 rounded-md transition-colors",
-            selectedTool === tool.id 
-              ? "bg-[#3A5A34] text-white shadow-inner" 
-              : "text-[#5C4D3C] hover:bg-[#F5F9F4] hover:text-[#2A4B26]"
+        <Fragment key={tool.id}>
+          {tool.id === 'Eraser' && (
+            <button
+              onClick={handleAutoGenerate}
+              title="Magic Auto-Generate"
+              className="flex shrink-0 items-center justify-center w-10 h-10 rounded-md text-[#E0A800] hover:bg-yellow-50/50 hover:text-yellow-600 shadow-sm border border-yellow-200/50"
+            >
+              <Wand2 size={20} strokeWidth={1.5} />
+            </button>
           )}
-        >
-          <tool.icon size={20} strokeWidth={1.5} />
-        </button>
+          <button
+            onClick={() => setTool(tool.id)}
+            title={tool.label}
+            className={cn(
+              "flex shrink-0 items-center justify-center w-10 h-10 rounded-md transition-colors",
+              selectedTool === tool.id 
+                ? "bg-[#3A5A34] text-white shadow-inner" 
+                : "text-[#5C4D3C] hover:bg-[#F5F9F4] hover:text-[#2A4B26]"
+            )}
+          >
+            <tool.icon size={20} strokeWidth={1.5} />
+          </button>
+        </Fragment>
       ))}
       
       <div className="w-px h-8 lg:w-8 lg:h-px shrink-0 bg-[#E8DFCE] my-0 mx-1 lg:mx-0 lg:my-1" />
@@ -131,16 +146,6 @@ export default function SidebarLeft() {
         className="flex shrink-0 items-center justify-center w-10 h-10 rounded-md text-[#C84630] hover:bg-red-50"
       >
         <Trash2 size={20} strokeWidth={1.5} />
-      </button>
-
-      <div className="w-px h-8 lg:w-8 lg:h-px shrink-0 bg-[#E8DFCE] my-0 mx-1 lg:mx-0 lg:my-1" />
-
-      <button
-        onClick={handleAutoGenerate}
-        title="Magic Auto-Generate"
-        className="flex shrink-0 items-center justify-center w-10 h-10 rounded-md text-[#E0A800] hover:bg-yellow-50/50 hover:text-yellow-600 shadow-sm border border-yellow-200/50"
-      >
-        <Wand2 size={20} strokeWidth={1.5} />
       </button>
     </div>
   );
