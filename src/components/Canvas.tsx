@@ -21,7 +21,8 @@ export default function Canvas() {
     selectElement, 
     updateElement, 
     removeElement,
-    showGrid
+    showGrid,
+    currentFlowerSize
   } = useStore();
 
   const [isDragging, setIsDragging] = useState(false);
@@ -98,7 +99,7 @@ export default function Canvas() {
           x: x + Math.cos(angle) * radius,
           y: y + Math.sin(angle) * radius,
           rotation: angle * (180 / Math.PI) + 90,
-          scale: 0.8,
+          scale: currentFlowerSize * 0.8,
           ringId
         });
       }
@@ -142,10 +143,10 @@ export default function Canvas() {
             const angle = (Math.PI * 2 / symmetries) * i;
             const rx = x * Math.cos(angle) - y * Math.sin(angle);
             const ry = x * Math.sin(angle) + y * Math.cos(angle);
-            newElements.push({ type, name: selectedFlower, x: rx, y: ry, rotation: Math.random() * 360, scale: 1 });
+            newElements.push({ type, name: selectedFlower, x: rx, y: ry, rotation: Math.random() * 360, scale: currentFlowerSize });
           }
         } else {
-          newElements.push({ type, name: selectedFlower, x, y, rotation: Math.random() * 360, scale: 1 });
+          newElements.push({ type, name: selectedFlower, x, y, rotation: Math.random() * 360, scale: currentFlowerSize });
         }
         
         setBrushElements(newElements);
@@ -263,10 +264,10 @@ export default function Canvas() {
               const angle = (Math.PI * 2 / symmetries) * i;
               const rx = x * Math.cos(angle) - y * Math.sin(angle);
               const ry = x * Math.sin(angle) + y * Math.cos(angle);
-              newElements.push({ type, name: selectedFlower, x: rx, y: ry, rotation: Math.random() * 360, scale: 1 });
+              newElements.push({ type, name: selectedFlower, x: rx, y: ry, rotation: Math.random() * 360, scale: currentFlowerSize });
             }
           } else {
-            newElements.push({ type, name: selectedFlower, x, y, rotation: Math.random() * 360, scale: 1 });
+            newElements.push({ type, name: selectedFlower, x, y, rotation: Math.random() * 360, scale: currentFlowerSize });
           }
           
           setBrushElements(prev => [...prev, ...newElements]);
@@ -291,7 +292,7 @@ export default function Canvas() {
               size: previewRadius,
               flowerName: selectedFlower,
               flowerCount: count,
-              flowerSize: 1,
+              flowerSize: currentFlowerSize,
               rotation: 0
             });
           } else if (selectedTool === 'Polygon') {
@@ -320,7 +321,7 @@ export default function Canvas() {
                   x,
                   y,
                   rotation: angle * (180 / Math.PI) + 90,
-                  scale: 1
+                  scale: currentFlowerSize
                 });
               }
             }
@@ -369,7 +370,7 @@ export default function Canvas() {
               x,
               y,
               rotation,
-              scale: 1
+              scale: currentFlowerSize
             });
           }
           
@@ -405,7 +406,7 @@ export default function Canvas() {
               x,
               y,
               rotation,
-              scale: 1
+              scale: currentFlowerSize
             });
           }
           

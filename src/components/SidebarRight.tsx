@@ -13,15 +13,34 @@ export default function SidebarRight() {
   const setTool = useStore(state => state.setTool);
   const selectedFlower = useStore(state => state.selectedFlower);
   const selectFlower = useStore(state => state.selectFlower);
+  const currentFlowerSize = useStore(state => state.currentFlowerSize);
+  const setFlowerSize = useStore(state => state.setFlowerSize);
 
   return (
     <div className="flex flex-col h-full overflow-hidden w-full">
       
       {/* Panel 1: Flowers & Assets */}
       <div className="bg-[#FFF9ED]/95 backdrop-blur-sm rounded-lg border border-[#E8DFCE] flex flex-col flex-1 min-h-0 shadow-sm h-full">
-        <div className="px-3 py-2 border-b border-[#E8DFCE] flex items-center gap-2 bg-white/50 rounded-t-lg">
-          <ImageIcon size={14} className="text-[#3A5A34]" />
-          <h2 className="text-[11px] font-bold text-[#5C4D3C] uppercase tracking-wider">Assets</h2>
+        <div className="px-3 py-2 border-b border-[#E8DFCE] flex flex-col gap-2 bg-white/50 rounded-t-lg">
+          <div className="flex items-center gap-2">
+            <ImageIcon size={14} className="text-[#3A5A34]" />
+            <h2 className="text-[11px] font-bold text-[#5C4D3C] uppercase tracking-wider">Assets</h2>
+          </div>
+          <div className="flex flex-col gap-1 w-full mt-1">
+            <div className="flex justify-between items-center text-[10px] font-bold text-[#5C4D3C]">
+              <span>Size</span>
+              <span>{Math.round(currentFlowerSize * 100)}%</span>
+            </div>
+            <input 
+              type="range" 
+              min="0.5" 
+              max="2" 
+              step="0.1" 
+              value={currentFlowerSize} 
+              onChange={(e) => setFlowerSize(parseFloat(e.target.value))}
+              className="w-full h-1.5 bg-[#E8DFCE] rounded-lg appearance-none cursor-pointer accent-[#3A5A34]"
+            />
+          </div>
         </div>
         
         {/* Grid */}

@@ -44,6 +44,7 @@ export type ToolType = 'Select' | 'Brush' | 'Circle' | 'SmallCircle' | 'Pen' | '
 export interface AppState extends DesignState {
   selectedTool: ToolType;
   selectedFlower: string | null;
+  currentFlowerSize: number;
   selectedElementId: string | null;
   history: DesignState[];
   historyIndex: number;
@@ -51,6 +52,7 @@ export interface AppState extends DesignState {
   // Actions
   setTool: (tool: ToolType) => void;
   selectFlower: (flowerName: string | null) => void;
+  setFlowerSize: (size: number) => void;
   selectElement: (id: string | null) => void;
   setCanvasSize: (size: 'Small' | 'Medium' | 'Large') => void;
   setBackground: (bg: 'natural' | 'floral' | 'sand' | 'dark') => void;

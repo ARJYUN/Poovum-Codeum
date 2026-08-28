@@ -21,6 +21,7 @@ export const useStore = create<AppState>()(
       ...initialState,
       selectedTool: 'Select',
       selectedFlower: 'Flower 1',
+      currentFlowerSize: 1,
       selectedElementId: null,
       history: [initialState],
       historyIndex: 0,
@@ -36,6 +37,7 @@ export const useStore = create<AppState>()(
 
       setTool: (tool) => set({ selectedTool: tool }),
       selectFlower: (flowerName) => set({ selectedFlower: flowerName }),
+      setFlowerSize: (size) => set({ currentFlowerSize: size }),
       selectElement: (id) => set({ selectedElementId: id }),
       setCanvasSize: (size) => set({ canvasSize: size }),
       setBackground: (bg) => set({ background: bg }),
