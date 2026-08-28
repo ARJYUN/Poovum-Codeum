@@ -4,8 +4,6 @@ Welcome to **Poovum Codeum**, a digital Pookalam (floral carpet) creator built f
 
 With its suite of advanced geometric and drawing tools, Poovum Codeum makes it easy for anyone to create first-prize-winning floral designs and export them as high-quality images.
 
-![Poovum Codeum](https://raw.githubusercontent.com/ARJYUN/Poovum-Koodum/main/public/flowers/1.png)
-
 ## ✨ Features
 
 - 🌸 **23 Authentic Flowers & Leaves:** Select from a curated library of digital floral assets.
