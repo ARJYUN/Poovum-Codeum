@@ -72,7 +72,6 @@ export default function SidebarLeft() {
       
       // Center piece
       store.addElements([{
-        id: Math.random().toString(36).substring(2, 9),
         type: 'flower',
         name: flowers[Math.floor(Math.random() * flowers.length)],
         x: 0,
